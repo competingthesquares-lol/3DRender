@@ -97,8 +97,9 @@ function CanvasAnimation () {
         let color = 0;
 
         const render = () => {
-            const dt = 1/FPS;
-            angle += Math.PI * dt;
+            //const dt = 1/FPS;
+            //angle += Math.PI * dt;
+            angle += 0.05;
             varHue = (varHue + 1) % 360;
             clear();
             const transformedPoints = Points.map(pRaw => {
@@ -126,7 +127,7 @@ function CanvasAnimation () {
                 ctx.moveTo(p[0].x, p[0].y);
                 for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
                 ctx.closePath();
-                const isVisible = (p[1].x - p[0].x) * (p[2].y - p[1].y) - (p[2].x - p[1].x) * (p[1].y - p[0].y) > 0;
+                const isVisible = (p[1].x - p[0].x) * (p[2].y - p[1].y) - (p[2].x - p[1].x) * (p[1].y - p[0].y) >= 0;
                 if (isVisible) {
                     ctx.fillStyle = poly.color;
                     ctx.fill();
@@ -149,7 +150,7 @@ function App() {
       fetch('/api/message')
         .then(res => res.json())
         .then(data => console.log(data.message));
-    }, []);j
+    }, []);
     return (
         <>
             <h1> Canvas + React </h1>
