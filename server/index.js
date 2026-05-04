@@ -3,8 +3,23 @@ const cors = require('cors');
 const app = express();
 const PORT = 5000;
 const path = require('path');
+const mongoose = require('mongoose');
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../3DRender/dist'))); // 'build' if using CRA
+mongoose.connect('mongodb://127.0.0.1:27017/simple_api')
+    .then(() => console.log('Connected to MongoDB successfully!'))
+    .catch(err => {
+        console.error('Could not connect to MongoDB. Is your MongoDB service running?');
+        console.error(err.message);
+    });
+
+const pointSchema = new mongoose.Schema({
+    
+});
+
+const polygonSchema = new mongoose.Schema({
+    
+});
 app.get('/api/message', (req, res) => {
     res.json({message: "Hello from Express!"});
 });
@@ -13,3 +28,4 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../3DRender/dist/index.html'));
 });
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
