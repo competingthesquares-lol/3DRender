@@ -9,6 +9,8 @@
     "client": "npm run dev --prefix 3DRender"
   },
   "dependencies": {
-    "cors": "^2.8.6"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.1"
   }
 }

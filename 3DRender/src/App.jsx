@@ -1,58 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import heroImg from './assets/hero.png';
 import './App.css';
 
-function CanvasAnimation() {
+// --- Preset Shapes for easy testing ---
+const SHAPE_PRESETS = {
+    Cube: {
+        points: [
+            {x: 0.5, y: 0.5, z: 0.5}, {x: -0.5, y: 0.5, z: 0.5},
+            {x: -0.5, y: -0.5, z: 0.5}, {x: 0.5, y: -0.5, z: 0.5},
+            {x: 0.5, y: 0.5, z: -0.5}, {x: -0.5, y: 0.5, z: -0.5},
+            {x: -0.5, y: -0.5, z: -0.5}, {x: 0.5, y: -0.5, z: -0.5}
+        ],
+        polygons: [
+            {p: [0, 1, 2, 3], color: "#FFCD00"}, {p: [7, 6, 5, 4], color: "#FFFFFF"},
+            {p: [1, 0, 4, 5], color: "#078446"}, {p: [2, 1, 5, 6], color: "#800020"},
+            {p: [3, 2, 6, 7], color: "#1E44D9"}, {p: [0, 3, 7, 4], color: "#FFA500"}
+        ]
+    },
+    Pyramid: {
+        points: [
+            {x: 0, y: 0.6, z: 0}, {x: -0.5, y: -0.5, z: 0.5},
+            {x: 0.5, y: -0.5, z: 0.5}, {x: 0.5, y: -0.5, z: -0.5},
+            {x: -0.5, y: -0.5, z: -0.5}
+        ],
+        polygons: [
+            {p: [0, 1, 2], color: "#FFCD00"}, {p: [0, 2, 3], color: "#078446"},
+            {p: [0, 3, 4], color: "#800020"}, {p: [0, 4, 1], color: "#1E44D9"},
+            {p: [4, 3, 2, 1], color: "#FFFFFF"} // Base
+        ]
+    }
+};
+
+// Canvas Component now accepts points and polygons as props
+function CanvasAnimation({ points = [], polygons = [] }) {
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        if (!points.length || !polygons.length) return;
+
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         let animationFrameId;
         
-        const Points = [
-            {x: 0.5, y: 0.5, z: 0.5}, {x: -0.5, y: 0.5, z: 0.5},
-            {x: -0.5, y: -0.5, z: 0.5}, {x: 0.5, y: -0.5, z: 0.5}, {x: 0.5, y: 0.5, z: -0.5}, {x: -0.5, y: 0.5, z: -0.5},
-            {x: -0.5, y: -0.5, z: -0.5}, {x: 0.5, y: -0.5, z: -0.5}
-        ];
-
-        const Polygon = [
-            {p: [0, 1, 2, 3], color: "#FFCD00"},
-            {p: [7, 6, 5, 4], color: "#FFFFFF"},
-            {p: [1, 0, 4, 5], color: "#078446"},
-            {p: [2, 1, 5, 6], color: "#800020"},
-            {p: [3, 2, 6, 7], color: "#1E44D9"},
-            {p: [0, 3, 7, 4], color: "#FFA500"}
-        ];
-
-        const screen = (p) => {
-            return {x: (p.x+1) / 2 * canvas.width, y: (1-(p.y+1) / 2) * canvas.height};
-        };
-
-        const clear = () => {
-            ctx.fillStyle = "#101010"; // Canvas background
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        };
-
+        const screen = (p) => ({x: (p.x+1) / 2 * canvas.width, y: (1-(p.y+1) / 2) * canvas.height});
+        const clear = () => { ctx.fillStyle = "#101010"; ctx.fillRect(0, 0, canvas.width, canvas.height); };
         const project = ({x, y, z}) => ({x: x/z, y: y/z});
         const translate_z = ({x, y, z}, dz) => ({x, y, z: z+dz});
-        
-        const rotate_xz = ({x, y, z}, angle) => {
-            const c = Math.cos(angle), s = Math.sin(angle);
-            return { x: x*c - z*s, y, z: x*s + z*c };
-        };
-        
-        const rotate_xy = ({x, y, z}, angle) => {
-            const c = Math.cos(angle), s = Math.sin(angle);
-            return { x: y*s + x*c, y: y*c - x*s, z };
-        };
-
-        const rotate_yz = ({x, y, z}, angle) => {
-            const c = Math.cos(angle), s = Math.sin(angle);
-            return { x, y: z*s + y*c, z: z*c - y*s };
-        };
+        const rotate_xz = ({x, y, z}, angle) => { const c = Math.cos(angle), s = Math.sin(angle); return { x: x*c - z*s, y, z: x*s + z*c }; };
+        const rotate_xy = ({x, y, z}, angle) => { const c = Math.cos(angle), s = Math.sin(angle); return { x: y*s + x*c, y: y*c - x*s, z }; };
+        const rotate_yz = ({x, y, z}, angle) => { const c = Math.cos(angle), s = Math.sin(angle); return { x, y: z*s + y*c, z: z*c - y*s }; };
 
         const dz = 2.0;
         let angle = 0;
@@ -60,26 +55,24 @@ function CanvasAnimation() {
 
         const render = () => {
             angle += 0.05;
+            varHue = (varHue + 1) % 360;
             clear();
             
-            varHue = (varHue + 1) % 360;
-            const transformedPoints = Points.map(pRaw => {
+            const transformedPoints = points.map(pRaw => {
                 const rotated = rotate_xy(rotate_xz(rotate_yz(pRaw, angle), 0.5 * angle), 0.5 * angle);
                 const translated = translate_z(rotated, dz);
                 const projected = project(translated);
                 return screen(projected);
             });
 
-
-
-            Polygon.forEach(poly => {
+            polygons.forEach(poly => {
                 const p = poly.p.map(idx => transformedPoints[idx]);
                 ctx.beginPath();
                 ctx.moveTo(p[0].x, p[0].y);
                 for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
                 ctx.closePath();
                 
-                // Backface culling
+                // Culling (only handles triangles/quads cleanly with this simple math, but works for our presets)
                 const isVisible = (p[1].x - p[0].x) * (p[2].y - p[1].y) - (p[2].x - p[1].x) * (p[1].y - p[0].y) >= 0;
                 if (isVisible) {
                     ctx.fillStyle = poly.color;
@@ -93,47 +86,138 @@ function CanvasAnimation() {
         };
         
         render();
-        
         return () => cancelAnimationFrame(animationFrameId);
-    }, []);
+    }, [points, polygons]); // Re-run animation setup if props change
 
-    // Scaled the canvas down slightly so it fits next to the sidebar nicely
     return <canvas ref={canvasRef} width={800} height={600} style={{ borderRadius: '12px', boxShadow: 'var(--shadow)' }}/>;
 }
 
 function App() {
-    const [inputValue, setInputValue] = useState('');
+    const [components, setComponents] = useState([]);
+    const [selectedId, setSelectedId] = useState(null);
+    const [newName, setNewName] = useState('');
+    const [shapeType, setShapeType] = useState('Cube');
+    const [editModeId, setEditModeId] = useState(null);
+    const [editName, setEditName] = useState('');
 
+    // Load components on mount
     useEffect(() => {
-      fetch('/api/message')
-        .then(res => res.json())
-        .then(data => console.log(data.message))
-        .catch(err => console.error("Could not fetch message", err));
+        fetchComponents();
     }, []);
 
+    const fetchComponents = async () => {
+        const res = await fetch('http://localhost:5000/api/components');
+        const data = await res.json();
+        setComponents(data);
+        if (data.length > 0 && !selectedId) {
+            setSelectedId(data[0]._id);
+        }
+    };
+
+    const handleCreate = async () => {
+        if (!newName.trim()) return;
+        const newComp = {
+            name: newName,
+            ...SHAPE_PRESETS[shapeType]
+        };
+
+        await fetch('http://localhost:5000/api/components', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newComp)
+        });
+        setNewName('');
+        fetchComponents();
+    };
+
+    const handleDelete = async (id) => {
+        await fetch(`http://localhost:5000/api/components/${id}`, { method: 'DELETE' });
+        if (selectedId === id) setSelectedId(null);
+        fetchComponents();
+    };
+
+    const handleUpdateName = async (id) => {
+        await fetch(`http://localhost:5000/api/components/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: editName })
+        });
+        setEditModeId(null);
+        fetchComponents();
+    };
+
+    const activeComponent = components.find(c => c._id === selectedId);
+
     return (
-        <>
-            {/* Fixed 'class' to 'className' */}
+        <div id="root">
             <aside className="sidebar">
                 <div className="sidebar-box">
-                    <h2>Menu</h2>
-                    <p>Sidebar content here.</p>
+                    <h2>Components DB</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
+                        <input 
+                            className="styled-input" 
+                            style={{ padding: '8px' }}
+                            placeholder="New Component Name" 
+                            value={newName} 
+                            onChange={e => setNewName(e.target.value)} 
+                        />
+                        <select className="styled-input" style={{ padding: '8px' }} value={shapeType} onChange={e => setShapeType(e.target.value)}>
+                            <option value="Cube">Cube</option>
+                            <option value="Pyramid">Pyramid</option>
+                        </select>
+                        <button onClick={handleCreate} style={{ padding: '8px', cursor: 'pointer' }}>Create</button>
+                    </div>
+
+                    <hr />
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
+                        {components.map(comp => (
+                            <div key={comp._id} style={{ 
+                                padding: '10px', 
+                                border: '1px solid var(--border)', 
+                                borderRadius: '4px',
+                                background: selectedId === comp._id ? 'var(--accent-bg)' : 'transparent'
+                            }}>
+                                {editModeId === comp._id ? (
+                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                        <input 
+                                            value={editName} 
+                                            onChange={e => setEditName(e.target.value)} 
+                                            style={{ width: '100%' }}
+                                        />
+                                        <button onClick={() => handleUpdateName(comp._id)}>Save</button>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <strong 
+                                            style={{ cursor: 'pointer', flexGrow: 1 }} 
+                                            onClick={() => setSelectedId(comp._id)}
+                                        >
+                                            {comp.name}
+                                        </strong>
+                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                            <button onClick={() => { setEditModeId(comp._id); setEditName(comp.name); }}>✎</button>
+                                            <button onClick={() => handleDelete(comp._id)}>❌</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </aside>
 
             <div className="content">
-                {/* Properly controlled React input with styling */}
-                <input 
-                    type="text" 
-                    className="styled-input"
-                    name="component" 
-                    placeholder="Search for a component..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                />
-                <CanvasAnimation/>
+                <h2>{activeComponent ? `Viewing: ${activeComponent.name}` : 'No Component Selected'}</h2>
+                {activeComponent ? (
+                    <CanvasAnimation points={activeComponent.points} polygons={activeComponent.polygons} />
+                ) : (
+                    <div style={{ width: 800, height: 600, background: '#101010', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                        Create or select a component to render.
+                    </div>
+                )}
             </div>
-        </>
+        </div>
     );
 }
 
