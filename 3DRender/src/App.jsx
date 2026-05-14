@@ -70,7 +70,6 @@ function CanvasAnimation({ points = [], polygons = [] }) {
                 for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
                 ctx.closePath();
                 
-                // Culling (only handles triangles/quads cleanly with this simple math, but works for our presets)
                 const isVisible = (p[1].x - p[0].x) * (p[2].y - p[1].y) - (p[2].x - p[1].x) * (p[1].y - p[0].y) >= 0;
                 if (isVisible) {
                     ctx.fillStyle = poly.color;
@@ -85,7 +84,7 @@ function CanvasAnimation({ points = [], polygons = [] }) {
         
         render();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [points, polygons]); // Re-run animation setup if props change
+    }, [points, polygons]);
 
     return <canvas ref={canvasRef} width={800} height={600} style={{ borderRadius: '12px', boxShadow: 'var(--shadow)' }}/>;
 }
@@ -98,7 +97,6 @@ function App() {
     const [editModeId, setEditModeId] = useState(null);
     const [editName, setEditName] = useState('');
 
-    // Load components on mount
     useEffect(() => {
         fetchComponents();
     }, []);
