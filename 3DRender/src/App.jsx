@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
-// --- Preset Shapes for easy testing ---
 const SHAPE_PRESETS = {
     Cube: {
         points: [
@@ -25,12 +24,11 @@ const SHAPE_PRESETS = {
         polygons: [
             {p: [0, 1, 2], color: "#FFCD00"}, {p: [0, 2, 3], color: "#078446"},
             {p: [0, 3, 4], color: "#800020"}, {p: [0, 4, 1], color: "#1E44D9"},
-            {p: [4, 3, 2, 1], color: "#FFFFFF"} // Base
+            {p: [4, 3, 2, 1], color: "#FFFFFF"}
         ]
     }
 };
 
-// Canvas Component now accepts points and polygons as props
 function CanvasAnimation({ points = [], polygons = [] }) {
     const canvasRef = useRef(null);
 
