@@ -102,14 +102,27 @@ function App() {
     }, []);
 
     const fetchComponents = async () => {
-        const res = await fetch('http://localhost:5000/api/components');
-        const data = await res.json();
-        setComponents(data);
-        if (data.length > 0 && !selectedId) {
-            setSelectedId(data[0]._id);
+        try {
+            const res = await fetch('http://localhost:5001/api/components');
+            if (!res.ok) {
+                throw new Error(`Server responded with status: ${res.status}`);
+            }
+
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setComponents(data);
+                if (data.length > 0 && !selectedId) {
+                    setSelectedId(data[0]._id);
+                }
+            } else {
+                console.error("Expected an array but got:", data);
+                setComponents([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch components:", error);
+            setComponents([]);
         }
     };
-
     const handleCreate = async () => {
         if (!newName.trim()) return;
         const newComp = {
@@ -117,7 +130,7 @@ function App() {
             ...SHAPE_PRESETS[shapeType]
         };
 
-        await fetch('http://localhost:5000/api/components', {
+        await fetch('http://localhost:5001/api/components', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newComp)
@@ -127,13 +140,13 @@ function App() {
     };
 
     const handleDelete = async (id) => {
-        await fetch(`http://localhost:5000/api/components/${id}`, { method: 'DELETE' });
+        await fetch(`http://localhost:5001/api/components/${id}`, { method: 'DELETE' });
         if (selectedId === id) setSelectedId(null);
         fetchComponents();
     };
 
     const handleUpdateName = async (id) => {
-        await fetch(`http://localhost:5000/api/components/${id}`, {
+        await fetch(`http://localhost:5001/api/components/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: editName })

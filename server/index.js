@@ -4,7 +4,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 app.use(cors());
 app.use(express.json());
@@ -41,6 +41,7 @@ app.post('/api/components', async (req, res) => {
         const savedComponent = await newComponent.save();
         res.status(201).json(savedComponent);
     } catch (err) {
+        console.error("POST Error:", err);
         res.status(400).json({ error: err.message });
     }
 });
@@ -50,6 +51,7 @@ app.get('/api/components', async (req, res) => {
         const components = await Component3D.find();
         res.json(components);
     } catch (err) {
+        console.error("GET Error:", err);
         res.status(500).json({ error: err.message });
     }
 });
