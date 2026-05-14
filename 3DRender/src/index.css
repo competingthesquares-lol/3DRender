@@ -49,12 +49,12 @@ body {
 }
 
 #root {
-  width: 100%; /* Changed from a fixed pixel width to allow responsive flow */
+  width: 100%;
   margin: 0 auto;
   text-align: center;
   min-height: 100svh;
   display: flex;
-  flex-direction: row; /* Changed to row to keep sidebar on the left */
+  flex-direction: row;
   box-sizing: border-box;
 }
 
@@ -81,14 +81,13 @@ body {
 
 .content {
   display: flex;
-  flex-direction: column; /* Stacks the input box above the canvas */
-  align-items: center;    /* Centers children horizontally */
-  gap: 30px;              /* Adds space between the input and canvas */
+  flex-direction: column;
+  align-items: center;  
+  gap: 30px;
   flex-grow: 1;
   padding: 40px;
 }
 
-/* New Input Styles */
 .styled-input {
   width: 100%;
   max-width: 400px;
